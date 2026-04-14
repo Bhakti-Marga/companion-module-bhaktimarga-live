@@ -4,7 +4,7 @@
   "name": "bhaktimarga-live",
   "shortname": "BM Live",
   "description": "Live broadcast control for Bhakti Marga via Stream Deck",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "MIT",
   "repository": "",
   "bugs": "",

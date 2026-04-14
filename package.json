@@ -10,7 +10,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "build:watch": "tsc -p tsconfig.build.json --watch",
-    "dev": "yarn build:watch"
+    "dev": "npm run build:watch",
+    "pack": "npm run build && npm pack"
   },
   "dependencies": {
     "@companion-module/base": "^1.14.0"
