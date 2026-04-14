@@ -2,9 +2,8 @@ import { combineRgb } from '@companion-module/base'
 import type { BhaktiMargaLiveInstance } from './main.js'
 
 const GREY = combineRgb(80, 80, 80)
-const BLUE = combineRgb(0, 100, 200)
+const DARK_GREY = combineRgb(40, 40, 40)
 const AMBER: [number, number, number] = [220, 160, 0]
-const GREEN = combineRgb(0, 160, 0)
 const RED: [number, number, number] = [200, 0, 0]
 const WHITE = combineRgb(255, 255, 255)
 const BLACK = combineRgb(0, 0, 0)
@@ -23,20 +22,23 @@ interface StateAppearance {
 	action: string
 	/** Status button: current state label */
 	status: string
-	bgcolor: number
+	/** Action button background — bright/saturated */
+	actionBg: number
+	/** Status button background — dimmed ~50% */
+	statusBg: number
 	color: number
 }
 
 const STATE_APPEARANCE: Record<string, StateAppearance> = {
-	'DRAFT': { action: 'PUBLISH', status: 'DRAFT', bgcolor: BLUE, color: WHITE },
-	'PUBLISHED': { action: 'START\nPREVIEW', status: 'PUBLISHED', bgcolor: GREEN, color: BLACK },
-	'STARTING SOON': { action: 'GO LIVE', status: 'PREVIEW', bgcolor: combineRgb(...AMBER), color: BLACK },
-	'LIVE': { action: 'HOLD TO\nEND', status: 'LIVE', bgcolor: combineRgb(...RED), color: WHITE },
-	'VOD IN PROGRESS': { action: 'VOD\nPROCESSING', status: 'VOD\nPROCESSING', bgcolor: GREY, color: WHITE },
-	'VOD READY': { action: 'VOD\nREADY', status: 'VOD\nREADY', bgcolor: GREY, color: WHITE },
+	'DRAFT':           { action: 'PUBLISH',         status: 'DRAFT',          actionBg: combineRgb(0, 100, 200), statusBg: combineRgb(0, 50, 100),   color: WHITE },
+	'PUBLISHED':       { action: 'PREVIEW',  status: 'PUBLISHED',      actionBg: combineRgb(0, 160, 0),   statusBg: combineRgb(0, 80, 0),     color: WHITE },
+	'STARTING SOON':   { action: 'GO LIVE',         status: 'PREVIEW',        actionBg: combineRgb(...AMBER),    statusBg: combineRgb(110, 80, 0),   color: WHITE },
+	'LIVE':            { action: 'HOLD TO\nEND',    status: 'LIVE',           actionBg: combineRgb(...RED),      statusBg: combineRgb(100, 0, 0),    color: WHITE },
+	'VOD IN PROGRESS': { action: 'VOD\nPROCESSING', status: 'Set VOD\nin Manager', actionBg: GREY,           statusBg: DARK_GREY,                 color: WHITE },
+	'VOD READY':       { action: 'VOD\nREADY',      status: 'VOD available\non Bhakti+',  actionBg: GREY,           statusBg: DARK_GREY,                 color: WHITE },
 }
 
-const NO_LIVE: StateAppearance = { action: 'NO LIVE\nSELECTED', status: 'NO LIVE\nSELECTED', bgcolor: GREY, color: WHITE }
+const NO_LIVE: StateAppearance = { action: 'NO LIVE', status: 'IDLE', actionBg: GREY, statusBg: DARK_GREY, color: WHITE }
 
 export function getStateAppearance(state: string | undefined): StateAppearance {
 	if (!state) return NO_LIVE
@@ -52,7 +54,7 @@ export function UpdateFeedbacks(self: BhaktiMargaLiveInstance): void {
 			options: [],
 			callback: () => {
 				const appearance = getStateAppearance(self.currentLive?.state)
-				let bgcolor = appearance.bgcolor
+				let bgcolor = appearance.actionBg
 
 				// Smooth pulse amber↔red when GO LIVE is available
 				if (self.currentLive?.state === 'STARTING SOON') {
@@ -69,13 +71,22 @@ export function UpdateFeedbacks(self: BhaktiMargaLiveInstance): void {
 		live_status: {
 			name: 'Live Status Display',
 			type: 'advanced',
-			description: 'Shows the current state of the live broadcast',
+			description: 'Shows the current state of the live broadcast with title and duration',
 			options: [],
 			callback: () => {
-				const appearance = getStateAppearance(self.currentLive?.state)
+				const live = self.currentLive
+				const appearance = getStateAppearance(live?.state)
+				const parts = [appearance.status]
+				if (live?.title) parts.push(live.title)
+				if (live?.isLiveNow && live.startDateLive) {
+					const elapsedSec = Math.max(0, Math.floor((Date.now() - new Date(live.startDateLive).getTime()) / 1000))
+					const mm = String(Math.floor(elapsedSec / 60)).padStart(2, '0')
+					const ss = String(elapsedSec % 60).padStart(2, '0')
+					parts.push(`${mm}:${ss}`)
+				}
 				return {
-					text: appearance.status,
-					bgcolor: appearance.bgcolor,
+					text: parts.join('\\n'),
+					bgcolor: appearance.statusBg,
 					color: appearance.color,
 				}
 			},

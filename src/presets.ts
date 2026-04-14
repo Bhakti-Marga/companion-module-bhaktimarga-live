@@ -13,7 +13,7 @@ export function UpdatePresets(self: BhaktiMargaLiveInstance): void {
 		category: 'Live Control',
 		name: 'Advance / End Live',
 		style: {
-			text: 'NO LIVE\nSELECTED',
+			text: 'NO LIVE',
 			size: 'auto',
 			color: WHITE,
 			bgcolor: GREY,
@@ -43,10 +43,10 @@ export function UpdatePresets(self: BhaktiMargaLiveInstance): void {
 		category: 'Live Control',
 		name: 'Live Status Display',
 		style: {
-			text: 'NO LIVE\nSELECTED',
+			text: 'IDLE',
 			size: 'auto',
 			color: WHITE,
-			bgcolor: GREY,
+			bgcolor: combineRgb(40, 40, 40),
 			show_topbar: false,
 		},
 		steps: [{ down: [], up: [] }],
