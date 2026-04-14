@@ -1,6 +1,6 @@
 # Companion Module Development Reference
 
-> Researched April 2026. Covers `@companion-module/base ~1.14.1`, Node 22, Companion 3.x.
+> Researched April 2026. Covers `@companion-module/base ~1.14.1`, Node 22, Companion 4.2+.
 
 ## Key Versions & Constraints
 
@@ -204,6 +204,12 @@ this.log('error', 'message')
   "products": ["..."]
 }
 ```
+
+## Compatibility Gotchas
+
+- **API version matching**: `@companion-module/base` must match Companion's `connectionModuleApiVersion` (currently 1.14.0 for Companion 4.2). Using a newer version causes silent crash-loops ("Restart forced").
+- **Symlinks don't work for dev modules**: Dev modules path must point to the **real directory**, not a symlink. Companion uses Node.js `--permission` model with `--allow-fs-read={basePath}`, which doesn't follow symlinks.
+- **Runtime type**: Must be `node22` in manifest — Companion 4.2 bundles Node 22.22.0.
 
 ## Sources
 

@@ -27,12 +27,11 @@ Bitfocus Companion module for Bhakti Marga live broadcast control. Operators use
 - `references/bitfocus-companion-docs/` — full Bitfocus Companion user guide, ingested from source. **Always read these docs first** when dealing with Companion concepts (buttons, presets, connections, modules, surfaces, etc.) rather than relying on memory.
 - `docs/companion-module-dev-reference.md` — module SDK reference (actions, feedbacks, presets, config fields, lifecycle).
 
-## Companion compatibility
+## Agent guidelines
 
-- Requires Companion **4.2+**
-- `@companion-module/base` must match Companion's `connectionModuleApiVersion` (currently 1.14.0 for Companion 4.2). Using a newer version causes silent crash-loops ("Restart forced").
-- Dev modules path must point to the **real directory**, not a symlink. Companion uses Node.js `--permission` model with `--allow-fs-read={basePath}`, which doesn't follow symlinks.
-- Runtime type `node22` in manifest — Companion 4.2 bundles Node 22.22.0.
+- **Keep docs current**: When you add, remove, or change features, update AGENTS.md, README.md, companion/HELP.md, and docs/ to reflect the change in the same commit. Don't leave docs for a follow-up.
+- **Comments explain "why", not "what"**: Don't narrate code (`// increment counter`). Do explain non-obvious decisions, constraints, or gotchas (`// 409 = stale state, next poll will correct`). If the code is clear on its own, no comment needed.
+- **Read the reference docs**: When working with Companion concepts (presets, feedbacks, actions, config fields, surfaces, etc.), always read `references/bitfocus-companion-docs/` and `docs/companion-module-dev-reference.md` first. Don't rely on training data or memory.
 
 ## Build and distribution
 
