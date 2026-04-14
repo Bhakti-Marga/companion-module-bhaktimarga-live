@@ -20,6 +20,11 @@ export class BhaktiMargaLiveInstance extends InstanceBase<ModuleConfig, ModuleSe
 	currentLive: CurrentLive | null = null
 
 	private pollTimer: ReturnType<typeof setInterval> | null = null
+	private pulseTimer: ReturnType<typeof setInterval> | null = null
+
+	/** 0–1 sine wave phase for the GO LIVE pulse animation */
+	pulsePhase = 0
+	private pulseStart = 0
 
 	constructor(internal: unknown) {
 		super(internal)
@@ -44,6 +49,7 @@ export class BhaktiMargaLiveInstance extends InstanceBase<ModuleConfig, ModuleSe
 
 	async destroy(): Promise<void> {
 		this.stopPolling()
+		this.stopPulse()
 	}
 
 	async configUpdated(config: ModuleConfig, secrets: ModuleSecrets): Promise<void> {
@@ -80,6 +86,27 @@ export class BhaktiMargaLiveInstance extends InstanceBase<ModuleConfig, ModuleSe
 		if (this.pollTimer !== null) {
 			clearInterval(this.pollTimer)
 			this.pollTimer = null
+		}
+	}
+
+	// ── Pulse animation ──────────────────────────────────────────────
+
+	private startPulse(): void {
+		if (this.pulseTimer) return
+		this.pulseStart = Date.now()
+		this.pulseTimer = setInterval(() => {
+			// 1.5s full cycle, smooth sine wave 0→1→0
+			const elapsed = (Date.now() - this.pulseStart) / 1500
+			this.pulsePhase = (Math.sin(elapsed * 2 * Math.PI) + 1) / 2
+			this.checkFeedbacks('live_button_state')
+		}, 60)
+	}
+
+	private stopPulse(): void {
+		if (this.pulseTimer) {
+			clearInterval(this.pulseTimer)
+			this.pulseTimer = null
+			this.pulsePhase = 0
 		}
 	}
 
@@ -124,6 +151,13 @@ export class BhaktiMargaLiveInstance extends InstanceBase<ModuleConfig, ModuleSe
 			live_state: live?.state ?? 'NO LIVE SELECTED',
 			live_duration: elapsed,
 		})
+		// Pulse the GO LIVE button when in preview/starting-soon state
+		if (live?.state === 'STARTING SOON') {
+			this.startPulse()
+		} else {
+			this.stopPulse()
+		}
+
 		this.checkFeedbacks('live_button_state', 'live_status')
 	}
 
