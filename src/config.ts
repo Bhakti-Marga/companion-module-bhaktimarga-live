@@ -2,8 +2,11 @@ import type { SomeCompanionConfigField } from '@companion-module/base'
 
 export interface ModuleConfig {
 	apiUrl: string
-	apiKey: string
 	pollInterval: number
+}
+
+export interface ModuleSecrets {
+	apiKey: string
 }
 
 export function GetConfigFields(): SomeCompanionConfigField[] {
@@ -13,11 +16,11 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 			id: 'apiUrl',
 			label: 'API Base URL',
 			width: 8,
-			default: 'https://api.bhaktiplus.com',
+			default: 'https://media-api.bhaktimarga.org',
 			tooltip: 'Base URL of the BM MediaPlatform API (no trailing slash)',
 		},
 		{
-			type: 'textinput',
+			type: 'secret-text',
 			id: 'apiKey',
 			label: 'Admin API Key',
 			width: 8,

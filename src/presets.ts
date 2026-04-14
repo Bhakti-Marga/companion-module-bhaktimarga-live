@@ -37,20 +37,25 @@ export function UpdatePresets(self: BhaktiMargaLiveInstance): void {
 		],
 	}
 
-	// Status display button — shows title, state, duration (no action)
+	// Status display button — shows current state with color (no action)
 	presets['live_status'] = {
 		type: 'button',
 		category: 'Live Control',
 		name: 'Live Status Display',
 		style: {
-			text: '$(bhaktimarga-live:live_title)\\n$(bhaktimarga-live:live_state)\\n$(bhaktimarga-live:live_duration)',
+			text: 'NO LIVE\nSELECTED',
 			size: 'auto',
 			color: WHITE,
-			bgcolor: combineRgb(30, 30, 30),
+			bgcolor: GREY,
 			show_topbar: false,
 		},
 		steps: [{ down: [], up: [] }],
-		feedbacks: [],
+		feedbacks: [
+			{
+				feedbackId: 'live_status',
+				options: {},
+			},
+		],
 	}
 
 	self.setPresetDefinitions(presets)

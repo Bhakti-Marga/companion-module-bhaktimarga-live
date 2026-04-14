@@ -4,7 +4,7 @@ import {
 	InstanceStatus,
 	type SomeCompanionConfigField,
 } from '@companion-module/base'
-import { GetConfigFields, type ModuleConfig } from './config.js'
+import { GetConfigFields, type ModuleConfig, type ModuleSecrets } from './config.js'
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
 import { UpdateFeedbacks } from './feedbacks.js'
@@ -12,8 +12,9 @@ import { UpdatePresets } from './presets.js'
 import { UpdateVariableDefinitions } from './variables.js'
 import type { StatusResponse, CurrentLive } from './api.js'
 
-export class BhaktiMargaLiveInstance extends InstanceBase<ModuleConfig> {
+export class BhaktiMargaLiveInstance extends InstanceBase<ModuleConfig, ModuleSecrets> {
 	config!: ModuleConfig
+	secrets!: ModuleSecrets
 
 	/** Latest polled state — null means no current live selected */
 	currentLive: CurrentLive | null = null
@@ -24,13 +25,20 @@ export class BhaktiMargaLiveInstance extends InstanceBase<ModuleConfig> {
 		super(internal)
 	}
 
-	async init(config: ModuleConfig): Promise<void> {
+	async init(config: ModuleConfig, _isFirstInit: boolean, secrets: ModuleSecrets): Promise<void> {
 		this.config = config
-		this.updateStatus(InstanceStatus.Connecting)
+		this.secrets = secrets
 		this.updateActions()
 		this.updateFeedbacks()
 		this.updateVariableDefinitions()
 		this.updatePresets()
+
+		if (!this.config.apiUrl || !this.secrets.apiKey) {
+			this.updateStatus(InstanceStatus.BadConfig, 'API URL and API Key must be set')
+			return
+		}
+
+		this.updateStatus(InstanceStatus.Connecting)
 		this.startPolling()
 	}
 
@@ -38,9 +46,16 @@ export class BhaktiMargaLiveInstance extends InstanceBase<ModuleConfig> {
 		this.stopPolling()
 	}
 
-	async configUpdated(config: ModuleConfig): Promise<void> {
+	async configUpdated(config: ModuleConfig, secrets: ModuleSecrets): Promise<void> {
 		this.config = config
+		this.secrets = secrets
 		this.stopPolling()
+
+		if (!this.config.apiUrl || !this.secrets.apiKey) {
+			this.updateStatus(InstanceStatus.BadConfig, 'API URL and API Key must be set')
+			return
+		}
+
 		this.updateStatus(InstanceStatus.Connecting)
 		this.startPolling()
 	}
@@ -89,7 +104,7 @@ export class BhaktiMargaLiveInstance extends InstanceBase<ModuleConfig> {
 		const url = `${this.config.apiUrl.replace(/\/+$/, '')}${path}`
 		const res = await fetch(url, {
 			method,
-			headers: { 'x-api-key': this.config.apiKey ?? '' },
+			headers: { 'x-api-key': this.secrets.apiKey ?? '' },
 			signal: AbortSignal.timeout(5000),
 		})
 		if (!res.ok && res.status !== 409 && res.status !== 404) {
@@ -109,7 +124,7 @@ export class BhaktiMargaLiveInstance extends InstanceBase<ModuleConfig> {
 			live_state: live?.state ?? 'NO LIVE SELECTED',
 			live_duration: elapsed,
 		})
-		this.checkFeedbacks('live_button_state')
+		this.checkFeedbacks('live_button_state', 'live_status')
 	}
 
 	/** Applies optimistic state after a successful action, before next poll confirms */
