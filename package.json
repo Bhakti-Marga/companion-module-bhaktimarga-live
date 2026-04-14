@@ -1,0 +1,22 @@
+{
+  "name": "companion-module-bhaktimarga-live",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/main.js",
+  "license": "MIT",
+  "engines": {
+    "node": "^22.20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
+    "dev": "yarn build:watch"
+  },
+  "dependencies": {
+    "@companion-module/base": "~1.14.1"
+  },
+  "devDependencies": {
+    "@companion-module/tools": "~2.7.1",
+    "typescript": "~5.9.3"
+  }
+}

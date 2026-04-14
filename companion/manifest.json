@@ -1,0 +1,24 @@
+{
+  "$schema": "../node_modules/@companion-module/base/assets/manifest.schema.json",
+  "id": "bhaktimarga-live",
+  "name": "bhaktimarga-live",
+  "shortname": "BM Live",
+  "description": "Live broadcast control for Bhakti Marga via Stream Deck",
+  "version": "0.0.0",
+  "license": "MIT",
+  "repository": "",
+  "bugs": "",
+  "maintainers": [
+    { "name": "Bhakti Marga Dev", "email": "dev@bhaktimarga.org" }
+  ],
+  "runtime": {
+    "type": "node22",
+    "api": "nodejs-ipc",
+    "apiVersion": "0.0.0",
+    "entrypoint": "../dist/main.js"
+  },
+  "legacyIds": [],
+  "manufacturer": "Bhakti Marga",
+  "products": ["Live Broadcast Control"],
+  "keywords": ["http", "live", "broadcast", "streamdeck"]
+}
