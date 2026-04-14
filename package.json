@@ -11,7 +11,7 @@
     "build": "tsc -p tsconfig.build.json",
     "build:watch": "tsc -p tsconfig.build.json --watch",
     "dev": "npm run build:watch",
-    "pack": "npm run build && npm pack"
+    "pack": "npm run build && npm pack --pack-destination dist/"
   },
   "dependencies": {
     "@companion-module/base": "^1.14.0"
