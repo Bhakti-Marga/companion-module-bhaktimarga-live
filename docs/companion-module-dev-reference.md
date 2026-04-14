@@ -1,14 +1,16 @@
 # Companion Module Development Reference
 
-> Researched April 2026. Covers `@companion-module/base ~1.14.1`, Node 22, Companion 4.2+.
+> Covers `@companion-module/base ~1.14.0`, Node 22, Companion 4.2+.
+> See also: `references/bitfocus-companion-docs/` for the full Companion user guide.
 
 ## Key Versions & Constraints
 
 | Item | Value |
 |---|---|
-| `@companion-module/base` | `~1.14.1` |
+| Companion | 4.2+ |
+| `@companion-module/base` | `^1.14.0` (must match Companion's `connectionModuleApiVersion`) |
 | Node.js | `^22.20` |
-| Package manager | Yarn 4 |
+| Package manager | npm |
 | Module system | ESM (`"type": "module"`) |
 | TypeScript module target | `"Node16"` / `"moduleResolution": "Node16"` |
 | `runtime.type` in manifest | `"node22"` |
@@ -18,19 +20,21 @@
 ## Project Structure
 
 ```
-companion-module-<vendor>-<product>/
+companion-module-bhaktimarga-live/
 ├── companion/
 │   ├── manifest.json      # Module metadata, runtime config
 │   └── HELP.md            # User-facing help shown in Companion UI
 ├── src/
 │   ├── main.ts            # Entry point, InstanceBase subclass
-│   ├── config.ts          # Config fields + interface
-│   ├── actions.ts         # Button press handlers
-│   ├── feedbacks.ts       # Button appearance driven by state
-│   ├── variables.ts       # Live data variables
-│   ├── presets.ts         # Pre-built button layouts
+│   ├── config.ts          # Config fields + secret definitions
+│   ├── actions.ts         # advance_live (short press), end_live (long press)
+│   ├── feedbacks.ts       # Action button + status display appearance, pulse animation
+│   ├── variables.ts       # live_title, live_state, live_duration
+│   ├── presets.ts         # Drag-and-drop button templates
 │   ├── upgrades.ts        # Config migration scripts
-│   └── api.ts             # API types (optional)
+│   └── api.ts             # API response types
+├── docs/                  # This file and dev docs
+├── references/            # Ingested Companion user guide (read-only reference)
 ├── dist/                  # Compiled output (gitignored)
 ├── package.json
 ├── tsconfig.json
@@ -43,17 +47,19 @@ companion-module-<vendor>-<product>/
 init(config) → configUpdated(config) → destroy()
 ```
 
-- `init()` is called once when the module is loaded. **Do not await long operations here** — it blocks the UI.
-- `configUpdated()` is called when the user changes settings. Restart polling, reconnect, etc.
-- `destroy()` is called when the module is unloaded. **Always clean up timers and connections.**
+- `init()` — called once when the module loads. Don't await long operations — it blocks the UI.
+- `configUpdated()` — called when the user changes settings. Restart polling, reconnect, etc.
+- `destroy()` — called when the module unloads. Always clean up timers and connections.
 
 ## Config Fields
 
 Defined in `getConfigFields()`, returns `SomeCompanionConfigField[]`.
 
-Field types: `textinput`, `number`, `checkbox`, `dropdown`, `multidropdown`, `colorpicker`, `static-text`.
+Field types: `textinput`, `secret-text`, `number`, `checkbox`, `dropdown`, `multidropdown`, `colorpicker`, `static-text`.
 
 Built-in regex: `Regex.IP`, `Regex.HOSTNAME`, `Regex.PORT`, `Regex.URL`.
+
+Our module uses `secret-text` for the API key — Companion stores it in its secrets store, separate from the exported config.
 
 ## Actions
 
@@ -88,6 +94,8 @@ Drive button appearance based on module state. Three types:
 
 Trigger re-evaluation: `self.checkFeedbacks('feedback_id')` or `self.checkAllFeedbacks()`.
 
+Our module uses `advanced` feedbacks for both buttons — the action button dynamically computes its label and background color (including the amber→red pulse), and the status button builds multi-line text.
+
 ## Variables
 
 ```typescript
@@ -102,7 +110,7 @@ Users reference as `$(instance_label:variable_id)`. IDs must match `[a-zA-Z0-9_-
 
 ## Presets (Long Press vs Short Press)
 
-Presets are pre-built button configurations users can drag onto their deck.
+Presets are pre-built button configurations users can drag onto their deck. See `references/bitfocus-companion-docs/user-guide/config/buttons/creating.md` for how users interact with presets.
 
 ```typescript
 presets['my_button'] = {
@@ -181,29 +189,28 @@ this.log('warn', 'message')
 this.log('error', 'message')
 ```
 
-## manifest.json Required Fields
+Users can view logs via **Connections → View Logs** in the Companion UI (see `references/bitfocus-companion-docs/user-guide/config/connections.md`).
+
+## manifest.json
+
+See `companion/manifest.json` for the live version. Required fields:
 
 ```json
 {
-  "id": "vendor-product",
-  "name": "vendor-product",
-  "shortname": "Product",
-  "description": "...",
-  "version": "0.0.0",
-  "license": "MIT",
-  "repository": "...",
-  "bugs": "...",
-  "maintainers": [{ "name": "...", "email": "..." }],
+  "id": "bhaktimarga-live",
+  "name": "bhaktimarga-live",
+  "shortname": "BM Live",
+  "version": "0.1.0",
   "runtime": {
     "type": "node22",
     "api": "nodejs-ipc",
     "apiVersion": "0.0.0",
     "entrypoint": "../dist/main.js"
-  },
-  "manufacturer": "...",
-  "products": ["..."]
+  }
 }
 ```
+
+Version must match `package.json`. The `apiVersion` field is auto-populated by Companion from `@companion-module/base`.
 
 ## Compatibility Gotchas
 
@@ -213,6 +220,7 @@ this.log('error', 'message')
 
 ## Sources
 
+- `references/bitfocus-companion-docs/` — full Companion user guide (local copy)
 - [companion-module-template-ts](https://github.com/bitfocus/companion-module-template-ts)
 - [@companion-module/base npm](https://www.npmjs.com/package/@companion-module/base)
 - [Module Development 101](https://companion.free/for-developers/module-development/module-development-101)
