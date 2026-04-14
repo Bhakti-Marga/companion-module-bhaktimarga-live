@@ -6,8 +6,8 @@
   "description": "Live broadcast control for Bhakti Marga via Stream Deck",
   "version": "0.1.0",
   "license": "MIT",
-  "repository": "",
-  "bugs": "",
+  "repository": "git+https://github.com/Bhakti-Marga/companion-module-bhaktimarga-live.git",
+  "bugs": "https://github.com/Bhakti-Marga/companion-module-bhaktimarga-live/issues",
   "maintainers": [
     { "name": "Bhakti Marga Dev", "email": "dev@bhaktimarga.org" }
   ],
