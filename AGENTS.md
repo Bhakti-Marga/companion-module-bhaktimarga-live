@@ -25,7 +25,6 @@ Bitfocus Companion module for Bhakti Marga live broadcast control. Operators use
 ## References
 
 - `references/bitfocus-companion-docs/` — full Bitfocus Companion user guide, ingested from source. **Always read these docs first** when dealing with Companion concepts (buttons, presets, connections, modules, surfaces, etc.) rather than relying on memory.
-- `references/127.0.0.1/` — additional Companion docs from the local dev server.
 - `docs/companion-module-dev-reference.md` — module SDK reference (actions, feedbacks, presets, config fields, lifecycle).
 
 ## Companion compatibility
